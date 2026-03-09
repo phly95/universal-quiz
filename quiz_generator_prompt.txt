@@ -1,0 +1,240 @@
+ACT AS AN EXPERT QUIZ GENERATOR. Generate a randomized JSON quiz using mandatory chunking to prevent truncation, wrapped in a code block for easy copying.
+
+MANDATORY WORKFLOW - EXECUTE EXACTLY:
+
+STEP 1 - GENERATE AND SAVE (Use ipython tool ONCE):
+```python
+import json
+import random
+import time
+from collections import Counter
+
+rng = random.Random(time.time_ns())
+
+quiz_data = {
+    "quizTitle": "[Extract descriptive title from transcript]",
+    "passingScore": 70,
+    "questions": [],
+    "caseStudies": []
+}
+
+# Generate 15-25 questions total (mix of regular and case study)
+# CRITICAL: For single/multiple/dragdrop, place correct answer at index 0 initially.
+# For truefalse, keep ["True", "False"] order and set correctAnswer to 0 (True) or 1 (False).
+
+# REGULAR QUESTIONS TEMPLATE (Generate content from transcript only):
+# NOTE: Generate "explanation" BEFORE "options" to ensure logical consistency.
+# IDs are placeholders (0) - the Python script assigns final sequential IDs.
+regular_questions = [
+    {
+        "id": 0,
+        "type": "single",
+        "question": "[Question text derived from transcript content]",
+        "explanation": "[Explanation citing specific section of transcript. Conclude with: 'Therefore, the correct option is [Answer].' - GENERATE THIS FIRST]",
+        "options": ["[Correct Answer]", "[Plausible Distractor 1]", "[Plausible Distractor 2]", "[Plausible Distractor 3]"],
+        "correctAnswer": 0
+    },
+    {
+        "id": 0,
+        "type": "multiple",
+        "question": "[Question text with 'Select all that apply']",
+        "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct options are [Answer(s)].' - GENERATE THIS FIRST]",
+        "options": ["[Correct 1]", "[Correct 2]", "[Distractor 1]", "[Distractor 2]"],
+        "correctAnswer": [0, 1]
+    },
+    {
+        "id": 0,
+        "type": "truefalse",
+        "question": "[Factual statement from transcript]",
+        "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the statement is [True/False].' - GENERATE THIS FIRST]",
+        "options": ["True", "False"],
+        "correctAnswer": 0  # 0 if True, 1 if False based on transcript
+    },
+    {
+        "id": 0,
+        "type": "dragdrop",
+        "dragdropType": "order",
+        "question": "[Order these steps/items correctly:]",
+        "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct order is [Sequence].' - GENERATE THIS FIRST]",
+        "items": ["[Item 1]", "[Item 2]", "[Item 3]", "[Item 4]"],
+        "correctOrder": [0, 1, 2, 3]
+    },
+    {
+        "id": 0,
+        "type": "dragdrop",
+        "dragdropType": "match",
+        "question": "[Match the item to its category/attribute:]",
+        "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct mapping is [Item->Target]...' - GENERATE THIS FIRST]",
+        "items": ["[Concept A]", "[Concept B]", "[Concept C]"],
+        "targets": ["[Category 1]", "[Category 2]", "[Category 3]", "[Category 4 - Distractor]"],
+        "correctMapping": [0, 1, 2]
+    }
+    # ... generate 10-20 more regular questions following these patterns ...
+]
+
+# CASE STUDIES TEMPLATE (Generate only if transcript contains scenario-based content):
+# IDs are placeholders (0) - the Python script assigns final sequential IDs.
+case_studies = [
+    {
+        "id": 0,
+        "title": "[Scenario title from transcript or 'Case Study: Practical Application']",
+        "scenario": "[2-3 paragraph scenario based on transcript content]",
+        "tabs": [
+            {"label": "[Tab Label 1]", "content": "[Context from transcript section 1]"},
+            {"label": "[Tab Label 2]", "content": "[Context from transcript section 2]"},
+            {"label": "[Tab Label 3]", "content": "[Context from transcript section 3]"}
+        ],
+        "questions": [
+            {
+                "id": 0,
+                "type": "single",
+                "question": "[Question referencing the case study context]",
+                "explanation": "[Explanation citing case study. Conclude with: 'Therefore, the correct option is [Answer].' - GENERATE THIS FIRST]",
+                "options": ["[Option 1]", "[Option 2]", "[Option 3]", "[Option 4]"],
+                "correctAnswer": 0
+            }
+            # ... generate 3-5 questions per case study ...
+        ]
+    }
+]
+
+quiz_data["questions"] = regular_questions
+quiz_data["caseStudies"] = case_studies
+
+# Randomize regular questions
+def process_question(q):
+    if q["type"] == "single":
+        opts = q["options"]
+        correct_text = opts[0]
+        rng.shuffle(opts)
+        q["options"] = opts
+        q["correctAnswer"] = opts.index(correct_text)
+
+    elif q["type"] == "multiple":
+        opts = q["options"]
+        correct_indices = q["correctAnswer"] if isinstance(q["correctAnswer"], list) else [0]
+        correct_items = [opts[i] for i in correct_indices]
+        rng.shuffle(opts)
+        q["options"] = opts
+        q["correctAnswer"] = sorted([opts.index(c) for c in correct_items])
+
+    elif q["type"] == "truefalse":
+        # Do not shuffle true/false options to maintain standard ["True", "False"] formatting
+        pass
+
+    elif q["type"] == "dragdrop":
+        if q["dragdropType"] == "order":
+            items = q["items"]
+            indices = list(range(len(items)))
+            rng.shuffle(indices)
+            q["items"] = [items[i] for i in indices]
+            old_to_new = {old: new for new, old in enumerate(indices)}
+            q["correctOrder"] = [old_to_new[i] for i in q["correctOrder"]]
+
+        elif q["dragdropType"] == "match":
+            # Shuffle items and update mapping to preserve item->target relationships
+            items = q["items"]
+            mapping = q["correctMapping"]
+            pairs = list(zip(items, mapping))
+            rng.shuffle(pairs)
+            q["items"] = [p[0] for p in pairs]
+            q["correctMapping"] = [p[1] for p in pairs]
+
+            # Shuffle targets and update mapping to point to new target positions
+            targets = q["targets"]
+            target_indices = list(range(len(targets)))
+            rng.shuffle(target_indices)
+            old_to_new = {old: new for new, old in enumerate(target_indices)}
+            q["targets"] = [targets[i] for i in target_indices]
+            q["correctMapping"] = [old_to_new[m] for m in q["correctMapping"]]
+
+for q in quiz_data["questions"]:
+    process_question(q)
+
+# Process case study questions too
+for cs in quiz_data.get("caseStudies", []):
+    for q in cs["questions"]:
+        process_question(q)
+
+# Assign final sequential IDs starting at 1
+# Order: regular questions first, then case studies (container + nested questions)
+counter = 1
+for q in quiz_data["questions"]:
+    q["id"] = counter
+    counter += 1
+
+for cs in quiz_data.get("caseStudies", []):
+    cs["id"] = counter
+    counter += 1
+    for q in cs["questions"]:
+        q["id"] = counter
+        counter += 1
+
+# Save to file
+with open('/mnt/kimi/output/quiz.json', 'w') as f:
+    json.dump(quiz_data, f, indent=2)
+
+print("SAVED")
+```
+
+STEP 2 - DETERMINE CHUNKS (Use ipython tool ONCE):
+```python
+with open('/mnt/kimi/output/quiz.json', 'r') as f:
+    content = f.read()
+
+chunk_size = 8000
+total_chunks = (len(content) + chunk_size - 1) // chunk_size
+print(f"CHUNKS_REQUIRED:{total_chunks}")
+```
+
+STEP 3 - EXTRACT CHUNKS (Use ipython tool MULTIPLE TIMES):
+Execute separately for each chunk:
+
+Chunk 0:
+```python
+with open('/mnt/kimi/output/quiz.json', 'r') as f:
+    content = f.read()
+print(f"CHUNK0:{content[0:8000]}:END_CHUNK0")
+```
+
+Chunk 1:
+```python
+with open('/mnt/kimi/output/quiz.json', 'r') as f:
+    content = f.read()
+print(f"CHUNK1:{content[8000:16000]}:END_CHUNK1")
+```
+(Continue pattern until all chunks extracted: Chunk 2, Chunk 3, etc.)
+
+STEP 4 - ASSEMBLE AND FORMAT (Final Response):
+1. Concatenate all chunk contents from Step 3 in order (CHUNK0 + CHUNK1 + CHUNK2...).
+2. Validate the concatenated string forms valid JSON (ensure no missing commas or broken brackets at the chunk seams).
+3. Output ONLY the JSON wrapped in a code block. Do not include any conversational filler.
+
+OUTPUT FORMAT:
+```json
+[concatenated JSON content here]
+```
+
+CONTENT GENERATION RULES:
+1. **STRUCTURE ONLY**: The templates above demonstrate JSON field structure and Python logic only. All bracketed placeholders [like this] must be replaced with content derived from the input transcript.
+2. **TRANSCRIPT-DERIVED CONTENT**: Every question, answer option, explanation, and case study detail must be based on the transcript provided below. Do not introduce external knowledge.
+3. **LOGICAL FLOW (CRITICAL)**: You must generate the "explanation" field BEFORE the "options" or "items" field.
+    - **MANDATORY**: End every explanation with a direct conclusion starting with **"Therefore..."** that explicitly names the correct answer/sequence.
+    - Example: *"Therefore, the correct option is [Option Text]."*
+4. **CITATION REQUIRED**: Explanations must reference specific sections of the transcript (e.g., "According to the section on [topic]..." or "As stated at [timestamp]...").
+5. **QUOTA**: Generate 15-25 total questions: 10-20 regular questions plus 1 case study containing 3-5 nested questions. Include at least 2 drag-and-drop questions (one "order" type, one "match" type).
+6. **DISTRACTORS**: Distractors (wrong answers) must be plausible but clearly wrong based on the transcript content. Create high-cognitive-load distractors that test true comprehension.
+
+JSON SCHEMA REQUIREMENTS:
+- Allowed types: "single", "multiple", "truefalse", "dragdrop"
+- "dragdrop" must specify "dragdropType" as "order" or "match"
+- "truefalse" options must be exactly ["True", "False"] with correctAnswer as 0 (True) or 1 (False). Do not force the correct answer to index 0 if the answer is False.
+- "dragdrop" "order": correctOrder[i] = item index that belongs at position i
+- "dragdrop" "match": items.length equals correctMapping.length; targets.length ≥ items.length (includes distractors). Uses items/targets/correctMapping fields (no "pairs" field).
+- Case study fields: "id", "title", "scenario", "tabs" (array of {label, content}), "questions" (array)
+- **ID DELEGATION**: Template IDs are placeholders (0). The Python script assigns final sequential IDs (1, 2, 3...) in the order: regular questions first, then each case study (container ID followed by nested question IDs).
+
+CONTENT TO PROCESS:
+```
+
+```
