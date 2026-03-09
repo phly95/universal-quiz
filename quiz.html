@@ -2010,8 +2010,9 @@ Please analyze my performance and provide:
                 case '7':
                 case '8':
                 case '9':
+                    e.preventDefault();
                     // Number keys for option selection
-                    if (isAnswered) return;
+                    if (isAnswered) break;
                     const num = parseInt(e.key) - 1;
                     
                     if (q.type === 'dragdrop') {
@@ -2032,8 +2033,9 @@ Please analyze my performance and provide:
                     break;
                     
                 case '0':
+                    e.preventDefault();
                     // 0 key for 10th option if available
-                    if (isAnswered) return;
+                    if (isAnswered) break;
                     if (q.options && q.options.length >= 10) {
                         selectOption(9);
                     }
