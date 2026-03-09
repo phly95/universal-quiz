@@ -175,9 +175,32 @@ The prompt relies on Kimi's unique features:
 - Save states include answers, current question, and quiz data
 
 ### Keyboard Shortcuts
-- **1-9** - Select answer option
-- **Space/Enter** - Submit or continue
-- **Arrow keys** - Navigate between questions
+
+| Key | Action |
+|-----|--------|
+| **1-9, 0** | Select option A-J |
+| **Enter / Space** | Submit answer or continue |
+| **← / →** or **, / .** | Previous / Next question |
+| **Home** | Go to first question |
+| **End** | Go to last question / back to results |
+| **S** | Save progress |
+| **C** | Toggle case study panel |
+| **Esc** | Clear drag-drop selection |
+
+**Input Screen:**
+| Key | Action |
+|-----|--------|
+| **Ctrl+Enter** | Load quiz |
+| **R** | Resume quiz (if available) |
+| **L** | Load example |
+
+**Results Screen:**
+| Key | Action |
+|-----|--------|
+| **Enter / Space** | Restart quiz |
+| **N** | Load new quiz |
+| **A** | Export for AI discussion |
+| **J** | Export JSON |
 
 ## 🔧 Browser Compatibility
 

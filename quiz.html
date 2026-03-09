@@ -1913,6 +1913,192 @@ Please analyze my performance and provide:
         window.exportForAI = exportForAI;
         window.exportJSON = exportJSON;
         window.toggleCaseStudy = toggleCaseStudy;
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't intercept if user is typing in textarea
+            if (e.target.tagName === 'TEXTAREA' && e.key !== 'Escape') return;
+            
+            const inputScreen = document.getElementById('inputScreen');
+            const quizScreen = document.getElementById('quizScreen');
+            const resultsScreen = document.getElementById('resultsScreen');
+            
+            // Input screen shortcuts
+            if (!inputScreen.classList.contains('hidden')) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    loadQuiz();
+                } else if (e.key === 'r' || e.key === 'R') {
+                    const resumeBox = document.getElementById('resumeBox');
+                    if (resumeBox.classList.contains('show')) {
+                        e.preventDefault();
+                        resumeQuiz();
+                    }
+                } else if (e.key === 'l' || e.key === 'L') {
+                    e.preventDefault();
+                    loadExample();
+                }
+                return;
+            }
+            
+            // Results screen shortcuts
+            if (!resultsScreen.classList.contains('hidden')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    restartQuiz();
+                } else if (e.key === 'n' || e.key === 'N') {
+                    e.preventDefault();
+                    newQuiz();
+                } else if (e.key === 'a' || e.key === 'A') {
+                    e.preventDefault();
+                    exportForAI();
+                } else if (e.key === 'j' || e.key === 'J') {
+                    e.preventDefault();
+                    exportJSON();
+                }
+                return;
+            }
+            
+            // Quiz screen shortcuts
+            if (quizScreen.classList.contains('hidden')) return;
+            
+            const q = quizData.questions[currentQuestion];
+            const isAnswered = answered[currentQuestion];
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                case '.':
+                    e.preventDefault();
+                    if (isAnswered) nextQuestion();
+                    break;
+                    
+                case 'ArrowLeft':
+                case ',':
+                    e.preventDefault();
+                    prevQuestion();
+                    break;
+                    
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    handlePrimaryAction();
+                    break;
+                    
+                case 's':
+                case 'S':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        manualSave();
+                    }
+                    break;
+                    
+                case 'c':
+                case 'C':
+                    e.preventDefault();
+                    const caseStudyPanel = document.getElementById('caseStudyPanel');
+                    if (!caseStudyPanel.classList.contains('hidden')) {
+                        toggleCaseStudy();
+                    }
+                    break;
+                    
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    // Number keys for option selection
+                    if (isAnswered) return;
+                    const num = parseInt(e.key) - 1;
+                    
+                    if (q.type === 'dragdrop') {
+                        // For drag-drop, number keys select from source items
+                        const items = q.items;
+                        if (num < items.length) {
+                            // Toggle selection of the item
+                            if (selectedDragItem === num) {
+                                selectedDragItem = null;
+                            } else {
+                                selectedDragItem = num;
+                            }
+                            renderQuestion();
+                        }
+                    } else if (q.options && num < q.options.length) {
+                        selectOption(num);
+                    }
+                    break;
+                    
+                case '0':
+                    // 0 key for 10th option if available
+                    if (isAnswered) return;
+                    if (q.options && q.options.length >= 10) {
+                        selectOption(9);
+                    }
+                    break;
+                    
+                case 'Escape':
+                    // Clear drag-drop selection
+                    if (q.type === 'dragdrop' && selectedDragItem !== null) {
+                        e.preventDefault();
+                        selectedDragItem = null;
+                        renderQuestion();
+                    }
+                    break;
+                    
+                case 'Home':
+                    e.preventDefault();
+                    if (currentQuestion > 0) {
+                        currentQuestion = 0;
+                        renderQuestion();
+                    }
+                    break;
+                    
+                case 'End':
+                    e.preventDefault();
+                    if (isReviewMode) {
+                        backToResults();
+                    } else if (currentQuestion < quizData.questions.length - 1) {
+                        currentQuestion = quizData.questions.length - 1;
+                        renderQuestion();
+                    }
+                    break;
+            }
+        });
+
+        // Show keyboard shortcuts help on first load
+        const keyboardShortcutsHelp = `
+Keyboard Shortcuts:
+===================
+
+Quiz Navigation:
+  ← / → or , / .  - Previous/Next question
+  Home            - Go to first question
+  End             - Go to last question
+  Enter / Space   - Submit answer or continue
+
+Answering:
+  1-9, 0          - Select option A-J
+  Esc             - Clear drag-drop selection
+
+Actions:
+  S               - Save progress
+  C               - Toggle case study panel
+
+Input Screen:
+  Ctrl+Enter      - Load quiz
+  R               - Resume quiz (if available)
+  L               - Load example
+
+Results Screen:
+  Enter / Space   - Restart quiz
+  N               - Load new quiz
+  A               - Export for AI discussion
+  J               - Export JSON
+        `;
+        console.log(keyboardShortcutsHelp);
     </script>
 </body>
 </html>
