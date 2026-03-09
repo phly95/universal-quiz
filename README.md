@@ -202,6 +202,8 @@ The prompt relies on Kimi's unique features:
 | **A** | Export for AI discussion |
 | **J** | Export JSON |
 
+⚠️ **Note:** If keyboard shortcuts don't work, check for browser extensions like **Vimium**, **Vim Vixen**, or other Vim-style navigation tools that may intercept number keys. Disable the extension on this page or use the mouse instead.
+
 ## 🔧 Browser Compatibility
 
 - ✅ Chrome / Edge (recommended)

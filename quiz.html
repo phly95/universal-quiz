@@ -1913,7 +1913,6 @@ Please analyze my performance and provide:
         window.exportForAI = exportForAI;
         window.exportJSON = exportJSON;
         window.toggleCaseStudy = toggleCaseStudy;
-        window.selectOption = selectOption;
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -2012,14 +2011,9 @@ Please analyze my performance and provide:
                 case '8':
                 case '9':
                     e.preventDefault();
-                    console.log('KEYBOARD: Number key pressed:', e.key, '- isAnswered:', isAnswered, '- q.type:', q?.type, '- q.options:', q?.options);
                     // Number keys for option selection
-                    if (isAnswered) {
-                        console.log('KEYBOARD: Question already answered, ignoring');
-                        break;
-                    }
+                    if (isAnswered) break;
                     const num = parseInt(e.key) - 1;
-                    console.log('KEYBOARD: Parsed num:', num);
                     
                     if (q.type === 'dragdrop') {
                         // For drag-drop, number keys select from source items
@@ -2034,10 +2028,7 @@ Please analyze my performance and provide:
                             renderQuestion();
                         }
                     } else if (q.options && num < q.options.length) {
-                        console.log('KEYBOARD: Calling selectOption(', num, ')');
                         selectOption(num);
-                    } else {
-                        console.log('KEYBOARD: Cannot select - q.options:', q?.options, 'num < length:', num < (q?.options?.length ?? 0));
                     }
                     break;
                     
