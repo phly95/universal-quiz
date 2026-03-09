@@ -118,41 +118,56 @@ A powerful, browser-based quiz player with support for AI-generated quizzes from
 }
 ```
 
-## 🤖 Generating Quizzes from Transcripts
+## 🤖 Generating Quizzes from Transcripts (Kimi.com)
 
-Use the included `quiz_generator_prompt.txt` with AI assistants (Claude, ChatGPT, etc.) to automatically generate quizzes from:
+Use the included `quiz_generator_prompt.txt` with **[Kimi.com](https://kimi.com)** to automatically generate quizzes from:
 - **Video transcripts** (YouTube, lectures, tutorials)
 - **Documentation** (technical docs, textbooks)
 - **Meeting recordings** (training sessions, presentations)
 
+> ⚠️ **Note:** This prompt is specifically designed for Kimi's tool-calling capabilities (ipython tool, chunked output handling). It may not work correctly with other AI assistants like ChatGPT or Claude.
+
 ### How to Use the Generator Prompt
 
-1. **Copy** the contents of `quiz_generator_prompt.txt`
-2. **Paste** into your AI assistant
-3. **Add your transcript** at the bottom (replace the empty content block)
-4. **The AI will**:
-   - Generate 15-25 questions from your content
-   - Include multiple question types
-   - Add detailed explanations with citations
-   - Randomize answer order to prevent memorization
-   - Output valid JSON ready for the quiz player
+1. **Go to [kimi.com](https://kimi.com)** and start a new chat
+2. **Copy** the contents of `quiz_generator_prompt.txt`
+3. **Paste** into Kimi
+4. **Add your transcript** at the bottom (replace the empty `CONTENT TO PROCESS` block)
+5. **Kimi will execute the 4-step workflow**:
+   - **Step 1:** Generate and save quiz JSON using the ipython tool
+   - **Step 2:** Determine number of chunks needed
+   - **Step 3:** Extract chunks using multiple tool calls
+   - **Step 4:** Assemble and output the final JSON
 
-### Generator Features
+### Why Kimi?
+
+The prompt relies on Kimi's unique features:
+
+| Feature | How It's Used |
+|---------|---------------|
+| **ipython tool** | Executes Python to generate, randomize, and save quiz data to `/mnt/kimi/output/quiz.json` |
+| **Chunked output** | Breaks large JSON into 8000-character chunks to prevent truncation |
+| **Multi-step execution** | Runs separate tool calls for each chunk extraction |
+| **Deterministic randomization** | Uses `time.time_ns()` seed for reproducible shuffling |
+
+### Generator Output Features
 
 - ✅ **Transcript-faithful** - Only uses content from your source material
-- ✅ **Chunking support** - Handles long outputs without truncation
+- ✅ **No truncation** - Chunking ensures complete JSON output
 - ✅ **Randomization** - Shuffles answers to prevent pattern recognition
-- ✅ **Explanations first** - AI generates reasoning before answers (better quality)
+- ✅ **Explanations first** - Kimi generates reasoning before answers (better quality)
 - ✅ **Citation required** - References specific sections of your transcript
+- ✅ **15-25 questions** - Mix of regular + case study questions
 
 ## 💡 Pro Tips
 
 ### Study Workflow
 1. **Watch a lecture** or **read documentation**
-2. **Copy the transcript** into the generator prompt
-3. **Load the generated quiz** into the player
-4. **Take the quiz** - wrong answers show explanations
-5. **Export results** and ask an AI tutor for help on weak areas
+2. **Copy the transcript** into the Kimi generator prompt
+3. **Let Kimi generate** the quiz JSON (follow the 4-step process)
+4. **Load the generated quiz** into the player
+5. **Take the quiz** - wrong answers show explanations
+6. **Export results** and ask Kimi (or another AI) for help on weak areas
 
 ### Resume Anywhere
 - Copy your save state (JSON) from the "Save" button
