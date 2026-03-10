@@ -2,7 +2,16 @@
 
 A powerful, browser-based quiz player with support for AI-generated quizzes from transcripts. No backend required—just open the HTML file and start learning.
 
+[![Live Demo](https://img.shields.io/badge/🚀-Try%20it%20Live-success?style=for-the-badge)](https://phly95.github.io/universal-quiz/)
 ![Quiz Player Preview](https://img.shields.io/badge/Platform-Web-blue) ![License](https://img.shields.io/badge/License-MIT-green)
+
+## 🚀 Try it Now
+
+**No installation needed!** Use the quiz player directly in your browser:
+
+👉 **[https://phly95.github.io/universal-quiz/](https://phly95.github.io/universal-quiz/)**
+
+Works on desktop and mobile. All data stays in your browser (localStorage).
 
 ## ✨ Features
 
@@ -40,10 +49,18 @@ A powerful, browser-based quiz player with support for AI-generated quizzes from
 
 ## 🚀 Quick Start
 
-1. **Open `quiz.html`** in any modern browser
-2. **Paste quiz JSON** into the text area (see format below)
-3. **Click "Load Quiz"**
-4. **Start learning!**
+### Option 1: Use Online (Easiest)
+1. **Go to [phly95.github.io/universal-quiz/](https://phly95.github.io/universal-quiz/)**
+2. **Paste quiz JSON** or click **"Generate from Transcript"** to create one
+3. **Start learning!**
+
+### Option 2: Use Locally
+1. **Download or clone this repo**
+2. **Open `index.html`** in any modern browser
+3. **Paste quiz JSON** into the text area (see format below)
+4. **Click "Load Quiz"**
+5. **Start learning!**
+
 
 ## 📋 Quiz JSON Format
 
