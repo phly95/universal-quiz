@@ -201,6 +201,18 @@
             color: #78350f;
         }
 
+        .case-study-scenario {
+            background: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .case-study-scenario p {
+            margin: 0;
+        }
+
         .case-study-indicator {
             background: var(--warning);
             color: white;
@@ -1195,6 +1207,14 @@
             const contentDiv = document.getElementById('caseStudyContent');
 
             tabsContainer.innerHTML = '';
+            contentDiv.innerHTML = '';
+            
+            // Always show scenario first if available
+            let contentHTML = '';
+            if (cs.scenario) {
+                contentHTML += `<div class="case-study-scenario"><p>${cs.scenario}</p></div>`;
+            }
+            
             if (cs.tabs && cs.tabs.length > 0) {
                 cs.tabs.forEach((tab, idx) => {
                     const btn = document.createElement('button');
@@ -1203,14 +1223,19 @@
                     btn.onclick = () => {
                         document.querySelectorAll('.case-study-tab').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        contentDiv.innerHTML = `<h3>${tab.label}</h3><p>${tab.content}</p>`;
+                        let tabHTML = '';
+                        if (cs.scenario) {
+                            tabHTML += `<div class="case-study-scenario"><p>${cs.scenario}</p></div>`;
+                        }
+                        tabHTML += `<h3>${tab.label}</h3><p>${tab.content}</p>`;
+                        contentDiv.innerHTML = tabHTML;
                     };
                     tabsContainer.appendChild(btn);
                 });
-                contentDiv.innerHTML = `<h3>${cs.tabs[0].label}</h3><p>${cs.tabs[0].content}</p>`;
-            } else {
-                contentDiv.innerHTML = `<p>${cs.scenario}</p>`;
+                contentHTML += `<h3>${cs.tabs[0].label}</h3><p>${cs.tabs[0].content}</p>`;
             }
+            
+            contentDiv.innerHTML = contentHTML;
         }
 
         function toggleCaseStudy() {
