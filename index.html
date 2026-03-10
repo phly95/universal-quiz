@@ -950,6 +950,16 @@
             line-height: 1.5;
         }
 
+        .info-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .info-text a:hover {
+            text-decoration: underline;
+        }
+
         .btn-kimi {
             background: #10b981;
             color: white;
@@ -995,7 +1005,8 @@
                         2. Click "Generate Prompt" to create the Kimi prompt<br>
                         3. Copy the generated prompt<br>
                         4. Click "Open Kimi.com" and paste it there<br>
-                        5. Kimi will generate a quiz JSON you can paste back here
+                        5. Kimi will generate a quiz JSON you can paste back here<br><br>
+                        💡 <strong>Tip:</strong> For YouTube videos, get transcripts from <a href="https://youtubetotranscript.com" target="_blank">youtubetotranscript.com</a>
                     </div>
                     <textarea id="transcriptInput" class="transcript-textarea" placeholder="Paste your transcript, lecture notes, or document content here..."></textarea>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">

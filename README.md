@@ -142,6 +142,8 @@ Use the included `quiz_generator_prompt.txt` with **[Kimi.com](https://kimi.com)
 - **Documentation** (technical docs, textbooks)
 - **Meeting recordings** (training sessions, presentations)
 
+> 💡 **Tip:** For YouTube videos, use **[youtubetotranscript.com](https://youtubetotranscript.com)** to easily extract the transcript. Just paste the YouTube URL and copy the text.
+
 > ⚠️ **Note:** This prompt is specifically designed for Kimi's tool-calling capabilities (ipython tool, chunked output handling). It may not work correctly with other AI assistants like ChatGPT or Claude.
 
 ### How to Use the Generator Prompt
