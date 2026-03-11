@@ -2145,7 +2145,6 @@ STEP 1 - GENERATE AND SAVE (Use ipython tool ONCE):
 import json
 import random
 import time
-from collections import Counter
 
 rng = random.Random(time.time_ns())
 
@@ -2239,22 +2238,34 @@ case_studies = [
 quiz_data["questions"] = regular_questions
 quiz_data["caseStudies"] = case_studies
 
-# Randomize regular questions
+# RANDOMIZATION WITH INDEX TRACKING (prevents substring collisions)
 def process_question(q):
     if q["type"] == "single":
-        opts = q["options"]
-        correct_text = opts[0]
-        rng.shuffle(opts)
-        q["options"] = opts
-        q["correctAnswer"] = opts.index(correct_text)
+        # Track original indices, shuffle them, then map correct answer
+        n = len(q["options"])
+        shuffled_indices = list(range(n))
+        rng.shuffle(shuffled_indices)
+
+        # Reorder options based on shuffled indices
+        original_options = q["options"][:]
+        q["options"] = [original_options[i] for i in shuffled_indices]
+
+        # Find where original index 0 (correct answer) ended up
+        q["correctAnswer"] = shuffled_indices.index(0)
 
     elif q["type"] == "multiple":
-        opts = q["options"]
-        correct_indices = q["correctAnswer"] if isinstance(q["correctAnswer"], list) else [0]
-        correct_items = [opts[i] for i in correct_indices]
-        rng.shuffle(opts)
-        q["options"] = opts
-        q["correctAnswer"] = sorted([opts.index(c) for c in correct_items])
+        # Store original correct indices
+        correct_old = q["correctAnswer"] if isinstance(q["correctAnswer"], list) else [0]
+        n = len(q["options"])
+        shuffled_indices = list(range(n))
+        rng.shuffle(shuffled_indices)
+
+        # Reorder options
+        original_options = q["options"][:]
+        q["options"] = [original_options[i] for i in shuffled_indices]
+
+        # Map each original correct index to its new position
+        q["correctAnswer"] = sorted([shuffled_indices.index(i) for i in correct_old])
 
     elif q["type"] == "truefalse":
         # Do not shuffle true/false options to maintain standard ["True", "False"] formatting
@@ -2262,29 +2273,42 @@ def process_question(q):
 
     elif q["type"] == "dragdrop":
         if q["dragdropType"] == "order":
-            items = q["items"]
-            indices = list(range(len(items)))
-            rng.shuffle(indices)
-            q["items"] = [items[i] for i in indices]
-            old_to_new = {old: new for new, old in enumerate(indices)}
+            # Shuffle item order
+            n = len(q["items"])
+            shuffled_indices = list(range(n))
+            rng.shuffle(shuffled_indices)
+
+            original_items = q["items"][:]
+            q["items"] = [original_items[i] for i in shuffled_indices]
+
+            # Map old positions to new positions for correctOrder
+            old_to_new = {old: new for new, old in enumerate(shuffled_indices)}
             q["correctOrder"] = [old_to_new[i] for i in q["correctOrder"]]
 
         elif q["dragdropType"] == "match":
-            # Shuffle items and update mapping to preserve item->target relationships
-            items = q["items"]
-            mapping = q["correctMapping"]
-            pairs = list(zip(items, mapping))
-            rng.shuffle(pairs)
-            q["items"] = [p[0] for p in pairs]
-            q["correctMapping"] = [p[1] for p in pairs]
+            # Shuffle items and update mapping
+            n_items = len(q["items"])
+            item_indices = list(range(n_items))
+            rng.shuffle(item_indices)
+
+            original_items = q["items"][:]
+            original_mapping = q["correctMapping"][:]
+
+            q["items"] = [original_items[i] for i in item_indices]
+            # Mapping follows the shuffled items
+            q["correctMapping"] = [original_mapping[i] for i in item_indices]
 
             # Shuffle targets and update mapping to point to new target positions
-            targets = q["targets"]
-            target_indices = list(range(len(targets)))
+            n_targets = len(q["targets"])
+            target_indices = list(range(n_targets))
             rng.shuffle(target_indices)
-            old_to_new = {old: new for new, old in enumerate(target_indices)}
-            q["targets"] = [targets[i] for i in target_indices]
-            q["correctMapping"] = [old_to_new[m] for m in q["correctMapping"]]
+
+            original_targets = q["targets"][:]
+            q["targets"] = [original_targets[i] for i in target_indices]
+
+            # Update mapping to point to new target positions
+            old_to_new_target = {old: new for new, old in enumerate(target_indices)}
+            q["correctMapping"] = [old_to_new_target[m] for m in q["correctMapping"]]
 
 for q in quiz_data["questions"]:
     process_question(q)
