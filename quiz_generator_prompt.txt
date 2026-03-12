@@ -18,8 +18,11 @@ quiz_data = {
 }
 
 # Generate 15-25 questions total (mix of regular and case study)
-# CRITICAL: For single/multiple/dragdrop, place correct answer at index 0 initially.
-# For truefalse, keep ["True", "False"] order and set correctAnswer to 0 (True) or 1 (False).
+# CRITICAL INSTRUCTIONS FOR CORRECT ANSWER INDEXING:
+# 1. For "single" and "multiple" types: Place correct answer(s) at the start of the options array (indices 0, 1, etc.)
+#    and ALWAYS set correctAnswer to 0 (or [0, 1] for multiple). The script shuffles later.
+# 2. For "truefalse" type: This is the ONLY exception - set correctAnswer to 0 if True, 1 if False.
+# 3. For "dragdrop" types: Use indices starting from 0 for correctOrder/correctMapping.
 
 # REGULAR QUESTIONS TEMPLATE (Generate content from transcript only):
 # NOTE: Generate "explanation" BEFORE "options" to ensure logical consistency.
@@ -30,24 +33,28 @@ regular_questions = [
         "type": "single",
         "question": "[Question text derived from transcript content]",
         "explanation": "[Explanation citing specific section of transcript. Conclude with: 'Therefore, the correct option is [Answer].' - GENERATE THIS FIRST]",
+        # ⚠️ MANDATORY: Place correct answer text at options[0] (first position)
+        # The Python script shuffles later. DO NOT change correctAnswer value below.
         "options": ["[Correct Answer]", "[Plausible Distractor 1]", "[Plausible Distractor 2]", "[Plausible Distractor 3]"],
-        "correctAnswer": 0
+        "correctAnswer": 0  # ⚠️ MANDATORY: ALWAYS 0 for "single" type. ⚠️
     },
     {
         "id": 0,
         "type": "multiple",
         "question": "[Question text with 'Select all that apply']",
         "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct options are [Answer(s)].' - GENERATE THIS FIRST]",
+        # ⚠️ MANDATORY: Place all correct answers at the beginning (indices 0, 1, etc.)
         "options": ["[Correct 1]", "[Correct 2]", "[Distractor 1]", "[Distractor 2]"],
-        "correctAnswer": [0, 1]
+        "correctAnswer": [0, 1]  # ⚠️ MANDATORY: List indices [0], [0,1], [0,1,2], etc. Always start from 0. ⚠️
     },
     {
         "id": 0,
         "type": "truefalse",
         "question": "[Factual statement from transcript]",
         "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the statement is [True/False].' - GENERATE THIS FIRST]",
+        # EXCEPTION RULE: For truefalse only, correctAnswer can be 0 OR 1
         "options": ["True", "False"],
-        "correctAnswer": 0  # 0 if True, 1 if False based on transcript
+        "correctAnswer": 0  # 0 = True, 1 = False. Set based on transcript. ONLY type where 1 is allowed.
     },
     {
         "id": 0,
@@ -56,7 +63,7 @@ regular_questions = [
         "question": "[Order these steps/items correctly:]",
         "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct order is [Sequence].' - GENERATE THIS FIRST]",
         "items": ["[Item 1]", "[Item 2]", "[Item 3]", "[Item 4]"],
-        "correctOrder": [0, 1, 2, 3]
+        "correctOrder": [0, 1, 2, 3]  # Item index 0 comes first, index 1 comes second, etc.
     },
     {
         "id": 0,
@@ -66,7 +73,7 @@ regular_questions = [
         "explanation": "[Explanation citing transcript. Conclude with: 'Therefore, the correct mapping is [Item->Target]...' - GENERATE THIS FIRST]",
         "items": ["[Concept A]", "[Concept B]", "[Concept C]"],
         "targets": ["[Category 1]", "[Category 2]", "[Category 3]", "[Category 4 - Distractor]"],
-        "correctMapping": [0, 1, 2]
+        "correctMapping": [0, 1, 2]  # items[0] matches targets[0], items[1] matches targets[1], etc.
     }
     # ... generate 10-20 more regular questions following these patterns ...
 ]
@@ -89,8 +96,8 @@ case_studies = [
                 "type": "single",
                 "question": "[Question referencing the case study context]",
                 "explanation": "[Explanation citing case study. Conclude with: 'Therefore, the correct option is [Answer].' - GENERATE THIS FIRST]",
-                "options": ["[Option 1]", "[Option 2]", "[Option 3]", "[Option 4]"],
-                "correctAnswer": 0
+                "options": ["[Correct Answer]", "[Distractor 1]", "[Distractor 2]", "[Distractor 3]"],
+                "correctAnswer": 0  # ⚠️ MANDATORY: ALWAYS 0 for "single" type. ⚠️
             }
             # ... generate 3-5 questions per case study ...
         ]
@@ -99,6 +106,49 @@ case_studies = [
 
 quiz_data["questions"] = regular_questions
 quiz_data["caseStudies"] = case_studies
+
+# VALIDATION - Check templates before randomization
+def validate_templates(data):
+    errors = []
+    for i, q in enumerate(data.get("questions", [])):
+        if q["type"] == "single":
+            if q.get("correctAnswer") != 0:
+                errors.append(f"Question {i+1} (single): correctAnswer is {q.get('correctAnswer')}, MUST be 0")
+        elif q["type"] == "multiple":
+            correct = q.get("correctAnswer", [])
+            if not isinstance(correct, list) or not all(isinstance(c, int) and c >= 0 for c in correct):
+                errors.append(f"Question {i+1} (multiple): correctAnswer must be a list of indices starting with 0")
+            elif correct[0] != 0:
+                errors.append(f"Question {i+1} (multiple): correctAnswer indices must start with 0, got {correct}")
+        elif q["type"] == "truefalse":
+            if q.get("correctAnswer") not in [0, 1]:
+                errors.append(f"Question {i+1} (truefalse): correctAnswer is {q.get('correctAnswer')}, MUST be 0 (True) or 1 (False)")
+        elif q["type"] == "dragdrop":
+            if q.get("dragdropType") == "order":
+                order = q.get("correctOrder", [])
+                if not all(isinstance(x, int) and x >= 0 for x in order):
+                    errors.append(f"Question {i+1} (dragdrop order): correctOrder contains invalid indices")
+            elif q.get("dragdropType") == "match":
+                mapping = q.get("correctMapping", [])
+                if not all(isinstance(x, int) and x >= 0 for x in mapping):
+                    errors.append(f"Question {i+1} (dragdrop match): correctMapping contains invalid indices")
+
+    for cs_idx, cs in enumerate(data.get("caseStudies", [])):
+        for i, q in enumerate(cs.get("questions", [])):
+            if q["type"] == "single" and q.get("correctAnswer") != 0:
+                errors.append(f"Case Study {cs_idx+1} Question {i+1}: correctAnswer is {q.get('correctAnswer')}, MUST be 0")
+            elif q["type"] == "truefalse" and q.get("correctAnswer") not in [0, 1]:
+                errors.append(f"Case Study {cs_idx+1} Question {i+1} (truefalse): correctAnswer must be 0 or 1")
+
+    if errors:
+        print("VALIDATION ERRORS - FIX BEFORE PROCEEDING:")
+        for e in errors:
+            print(f"  - {e}")
+        raise ValueError("Template validation failed")
+    else:
+        print("VALIDATION PASSED: All indices are properly set")
+
+validate_templates(quiz_data)
 
 # RANDOMIZATION WITH INDEX TRACKING (prevents substring collisions)
 def process_question(q):
@@ -131,6 +181,7 @@ def process_question(q):
 
     elif q["type"] == "truefalse":
         # Do not shuffle true/false options to maintain standard ["True", "False"] formatting
+        # correctAnswer stays as originally set (0 or 1)
         pass
 
     elif q["type"] == "dragdrop":
