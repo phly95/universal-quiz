@@ -1766,7 +1766,7 @@
             } else {
                 if (q.type === 'dragdrop') {
                     const placed = Object.keys(dragDropSelections[currentQuestion] || {}).length;
-                    const required = q.items.length;
+                    const required = q.dragdropType === 'order' ? q.correctOrder.length : q.items.length;
                     btn.textContent = `Submit (${placed}/${required})`;
                     btn.disabled = placed < required;
                 } else if (q.type === 'multiple') {
