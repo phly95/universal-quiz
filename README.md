@@ -177,16 +177,10 @@ The quiz player includes a built-in **"Generate from Transcript"** feature that 
 
 ### Why Kimi is Recommended
 
-The Kimi workflow has unique features for best results:
+1. **Higher quiz quality** - Kimi generates more accurate, well-structured questions with better explanations
+2. **No file download needed** - The JSON appears directly in chat for easy copy/paste (like Claude's artifacts)
 
-| Feature | How It's Used |
-|---------|---------------|
-| **ipython tool** | Executes Python to generate, randomize, and save quiz data |
-| **Chunked output** | Breaks large JSON into chunks to prevent truncation |
-| **Multi-step execution** | Runs separate tool calls for each chunk extraction |
-| **Deterministic randomization** | Uses `time.time_ns()` seed for reproducible shuffling |
-
-### Generator Output Features
+For Copilot Enterprise, you must download the quiz JSON file before pasting it into the player.
 
 - ✅ **Transcript-faithful** - Only uses content from your source material
 - ✅ **No truncation** - Chunking ensures complete JSON output (Kimi)
