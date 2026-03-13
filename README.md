@@ -41,23 +41,31 @@ Works on desktop and mobile. All data stays in your browser (localStorage).
   - **AI Discussion** - Formatted summary for tutoring
   - **Full JSON** - Complete result data
 
+### 🤖 AI-Powered Quiz Generation
+- **Multi-provider support** - Works with Kimi, Copilot Enterprise, Claude, and ChatGPT
+- **Built-in prompt generator** - Creates optimized prompts for each AI provider
+- **Transcript to quiz** - Convert video transcripts, docs, or any text into interactive quizzes
+- **Download option** - For AI providers that require file upload (Copilot Enterprise)
+
 ### 📱 Modern UI
 - Clean, responsive design (works on mobile & desktop)
 - Smooth animations and transitions
 - Progress bar and question navigation
+- **Built-in help** - Step-by-step guide for new users
 - Keyboard-friendly controls
 
 ## 🚀 Quick Start
 
 ### Option 1: Use Online (Easiest)
 1. **Go to [phly95.github.io/universal-quiz/](https://phly95.github.io/universal-quiz/)**
-2. **Paste quiz JSON** or click **"Generate from Transcript"** to create one
-3. **Start learning!**
+2. **Paste quiz JSON** or click **"🤖 Generate from Transcript"** to create one from video transcripts
+3. **Click "❓ Help"** if you need a guided walkthrough
+4. **Start learning!**
 
 ### Option 2: Use Locally
 1. **Download or clone this repo**
 2. **Open `index.html`** in any modern browser
-3. **Paste quiz JSON** into the text area (see format below)
+3. **Paste quiz JSON** into the text area (see format below) or generate from transcript
 4. **Click "Load Quiz"**
 5. **Start learning!**
 
@@ -135,46 +143,55 @@ Works on desktop and mobile. All data stays in your browser (localStorage).
 }
 ```
 
-## 🤖 Generating Quizzes from Transcripts (Kimi.com)
+## 🤖 Generating Quizzes from Transcripts
 
-Use the included `quiz_generator_prompt.txt` with **[Kimi.com](https://kimi.com)** to automatically generate quizzes from:
-- **Video transcripts** (YouTube, lectures, tutorials)
-- **Documentation** (technical docs, textbooks)
-- **Meeting recordings** (training sessions, presentations)
+The quiz player includes a built-in **"Generate from Transcript"** feature that creates AI prompts from your video transcripts or documents. Works with multiple AI providers:
+
+| AI Provider | Workflow | Notes |
+|-------------|----------|-------|
+| **[Kimi](https://kimi.com)** 🌙 | Copy/paste | **Recommended** - Best quality, chunked output, handles long transcripts |
+| **[Copilot Enterprise](https://copilot.cloud.microsoft)** 🪟 | Download/upload | File upload required (paste has length limits). Type "." in message box to send. |
+| **[Claude](https://claude.ai)** 🧠 | Copy/paste | Large context window, handles long prompts well |
+| **[ChatGPT](https://chat.openai.com)** 💬 | Copy/paste | Results vary by model |
 
 > 💡 **Tip:** For YouTube videos, use **[youtubetotranscript.com](https://youtubetotranscript.com)** to easily extract the transcript. Just paste the YouTube URL and copy the text.
 
-> ⚠️ **Note:** This prompt is specifically designed for Kimi's tool-calling capabilities (ipython tool, chunked output handling). It may not work correctly with other AI assistants like ChatGPT or Claude.
+### Supported Content Sources
+- **Video transcripts** (YouTube, lectures, tutorials)
+- **Documentation** (technical docs, textbooks)
+- **Meeting recordings** (training sessions, presentations)
+- **Any text content** you want to turn into a quiz!
 
-### How to Use the Generator Prompt
+### How to Generate a Quiz
 
-1. **Go to [kimi.com](https://kimi.com)** and start a new chat
-2. **Copy** the contents of `quiz_generator_prompt.txt`
-3. **Paste** into Kimi
-4. **Add your transcript** at the bottom (replace the empty `CONTENT TO PROCESS` block)
-5. **Kimi will execute the 4-step workflow**:
-   - **Step 1:** Generate and save quiz JSON using the ipython tool
-   - **Step 2:** Determine number of chunks needed
-   - **Step 3:** Extract chunks using multiple tool calls
-   - **Step 4:** Assemble and output the final JSON
+1. **Click "🤖 Generate from Transcript"** in the quiz player
+2. **Select your AI provider** (Kimi recommended for best results)
+3. **Paste your transcript** into the text area
+4. **Click "Generate Prompt"** to create the AI prompt
+5. **Copy** (or download for Copilot) the prompt
+6. **Open your chosen AI** and paste/send the prompt
+7. **The AI will generate** a quiz JSON file
+8. **Paste the JSON back** into the quiz player and click "Load Quiz"
 
-### Why Kimi?
+> 💡 **New to the app?** Click the **"❓ Help"** button for a step-by-step guide!
 
-The prompt relies on Kimi's unique features:
+### Why Kimi is Recommended
+
+The Kimi workflow has unique features for best results:
 
 | Feature | How It's Used |
 |---------|---------------|
-| **ipython tool** | Executes Python to generate, randomize, and save quiz data to `/mnt/kimi/output/quiz.json` |
-| **Chunked output** | Breaks large JSON into 8000-character chunks to prevent truncation |
+| **ipython tool** | Executes Python to generate, randomize, and save quiz data |
+| **Chunked output** | Breaks large JSON into chunks to prevent truncation |
 | **Multi-step execution** | Runs separate tool calls for each chunk extraction |
 | **Deterministic randomization** | Uses `time.time_ns()` seed for reproducible shuffling |
 
 ### Generator Output Features
 
 - ✅ **Transcript-faithful** - Only uses content from your source material
-- ✅ **No truncation** - Chunking ensures complete JSON output
+- ✅ **No truncation** - Chunking ensures complete JSON output (Kimi)
 - ✅ **Randomization** - Shuffles answers to prevent pattern recognition
-- ✅ **Explanations first** - Kimi generates reasoning before answers (better quality)
+- ✅ **Explanations first** - AI generates reasoning before answers (better quality)
 - ✅ **Citation required** - References specific sections of your transcript
 - ✅ **15-25 questions** - Mix of regular + case study questions
 
@@ -182,11 +199,11 @@ The prompt relies on Kimi's unique features:
 
 ### Study Workflow
 1. **Watch a lecture** or **read documentation**
-2. **Copy the transcript** into the Kimi generator prompt
-3. **Let Kimi generate** the quiz JSON (follow the 4-step process)
+2. **Copy the transcript** and use the "Generate from Transcript" feature
+3. **Let the AI generate** the quiz JSON
 4. **Load the generated quiz** into the player
 5. **Take the quiz** - wrong answers show explanations
-6. **Export results** and ask Kimi (or another AI) for help on weak areas
+6. **Export results** and ask an AI for help on weak areas
 
 ### Resume Anywhere
 - Copy your save state (JSON) from the "Save" button
@@ -234,9 +251,8 @@ The prompt relies on Kimi's unique features:
 
 MIT License - feel free to use for personal or commercial projects.
 
-## 🙏 Credits
+## 🎯 Perfect For
 
-Created for efficient learning and knowledge retention. Perfect for:
 - Certification exam prep (Azure, AWS, Google Cloud, etc.)
 - Course material review
 - Corporate training
